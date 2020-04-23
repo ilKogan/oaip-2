@@ -138,6 +138,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="lab1.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="lab1.cpp" />
+    <ClCompile Include="module\Task4.cpp" />
+    <ClCompile Include="module\Task12.cpp" />
+    <ClCompile Include="module\Task10.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
