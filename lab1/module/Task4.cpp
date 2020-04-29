@@ -6,16 +6,17 @@
 
 using namespace std;
 
-#define SEPARATE '/'
-#define NUL "0"
-#define NEXTLINE '\n'
-#define DELETE_MARK -2
-#define SEPARATE_MARK -1
+struct Date {
+	int day;
+	int month;
+	int year;
+};
 
 enum MODE {
-	DAY,
-	MONTH,
-	YEAR
+	DMY,
+	DM,
+	DY,
+	MY
 };
 
 void createFile(string name, string content) {
@@ -23,220 +24,183 @@ void createFile(string name, string content) {
 	oFile << content;
 	oFile.close();
 }
-string readFile(string name) {
-	string temp;
-	string line;
-	ifstream iFile(name);
-	while (getline(iFile, line)) {
-		temp += line += "\n";
-	}
-	iFile.close();
-	return temp;
-}
-void writeFile(string name, string content) {
-	ofstream oFile;
-	oFile.open(name, ios_base::app | ios_base::ate);
-	oFile << content;
-	oFile.close();
+Date createDate(int day, int month, int year) {
+	Date newDate;
+
+	newDate.day = day;
+	newDate.month = month;
+	newDate.year = year;
+	return newDate;
 }
 
-int countLineFile(string name) {
-	string tmp = readFile(name);
+//TODO: FIX convertStrToInt 
+int convertStrToint(int beginPos, string str, int dimen = 10) {
 	int ret = 0;
-	for (int i = 0; i < tmp.size(); i++) {
-		if (tmp[i] == NEXTLINE) {
-			ret++;
+	int dim = dimen;
+	for (int i = beginPos; ; i++) {
+		if (str[i] >= '0' && str[i] <= '9') {
+			ret += ret * 10 + (str[i] - '0') * dim;
+		}
+		dim /= 10;
+
+		if (dim == 1) {
+			ret += ret * 10 + (str[i] - '0') * dim;
+			break;
 		}
 	}
 	return ret;
 }
+string convertDateToStr(Date date, char separate, MODE mode) {
+	string day = to_string(date.day);
+	string month = to_string(date.month);
+	string year = to_string(date.year);
+	string strDate;
 
-void get2DArrfromString(int** output, string source, int size1, int size2) {
-
-	for (int i = 0; i < size1; i++) {
-		for (int j = 0; j < size2; j++) {
-			if (source[j] != SEPARATE) {
-				//Fast convert char to int
-				output[i][j] = (source[j] - 48);
-			} else {
-				output[i][j] = SEPARATE_MARK;
-			}
-		}
+	switch (mode) {
+	case DMY:
+		strDate += day;
+		strDate += separate;
+		strDate += month;
+		strDate += separate;
+		strDate += year;
+		break;
+	case DM:
+		strDate += day;
+		strDate += separate;
+		strDate += month;
+		break;
+	case DY:
+		strDate += day;
+		strDate += separate;
+		strDate += year;
+		break;
+	case MY:
+		strDate += month;
+		strDate += separate;
+		strDate += year;
+		break;
+	default:
+		break;
 	}
+	return strDate;
 }
-void delete2DArr(int** arr, int size2) {
-	for (int i = 0; i < size2; i++) {
-		delete[] arr[i];
+Date convertStrToDate(string date, char separate, MODE mode) {
+
+	int day = 0;
+	int month = 0;
+	int year = 0;
+
+	switch (mode) {
+	case DMY:
+		day = convertStrToint(0, date, 10);
+		month = convertStrToint(3, date, 10);
+		year = convertStrToint(6, date, 1000);
+		break;
+	case DM:
+		day = convertStrToint(0, date, 10);
+		month = convertStrToint(3, date, 10);
+		year = -1;
+		break;
+	case DY:
+		day = convertStrToint(0, date, 10);
+		month = -1;
+		year = convertStrToint(3, date, 1000);
+
+		break;
+	case MY:
+		day = -1;
+		month = convertStrToint(0, date, 10);
+		year = convertStrToint(3, date, 1000);
+		break;
+	default:
+		break;
 	}
-	delete[] arr;
-}
-
-int** create2DArr(int size, int size2) {
-	int** ptrArr = new int* [size];
-	for (int i = 0; i < size; i++) {
-		ptrArr[i] = new int[size2];
-	}
-	return ptrArr;
-}
-
-void clearCertainElementDate(int** numDate,int size,int size2, MODE mode) {
-	for (int i = 0; i < size; i++) {
-		for (int j = 0; j < size2; j++) {
-			switch (mode) {
-			case DAY: 
-				if (j == 0 || j == 1) {
-					numDate[i][j] = DELETE_MARK;
-				}
-				break;
-			case MONTH:
-				if (j == 3 || j == 4) {
-					numDate[i][j] = DELETE_MARK;
-				}
-				break;
-			case YEAR:
-				if (j > 5 && j < 10) {
-					numDate[i][j] = DELETE_MARK;
-				}
-				break;
-			default:
-				break;
-			}
-		}
-	}
-}
-
-void getStringfrom2DArr(string* strDate, int** numDate,int size, int size2) {
-	for (int i = 0; i < size; i++) {
-		for (int j = 0; j < size2 - 1; j++) {
-			if (numDate[i][j] == DELETE_MARK) {
-				continue;
-			} else if(numDate[i][j] == SEPARATE_MARK) {
-				strDate[j] = SEPARATE;
-			} else {
-//TODO: FIX ERROR.
-				strDate[j] = numDate[i][j];
-			}
-		}
-	}
-}
-
-void deleteDateElement(string name, MODE mode) {
-	string tmpStrDate = readFile(name);
-	int countLines = countLineFile(name);
-	const int countCharLine = 10;
-	int** ptrNumDate = create2DArr(countLines, countCharLine);
-	string* ptrStrDate = &tmpStrDate;
-
-	get2DArrfromString(ptrNumDate, tmpStrDate, countLines, countCharLine);
-	clearCertainElementDate(ptrNumDate, countLines, countCharLine,mode);
-	getStringfrom2DArr(ptrStrDate, ptrNumDate, countLines, countCharLine);
-	createFile(name, tmpStrDate);
-	delete2DArr(ptrNumDate, countCharLine);
-	delete[] ptrStrDate;
+	return createDate(day, month, year);
 }
 
 
-void fillRandomDate(string name, int count, int yearBegin, int yearEnd) {
-	string date;
-	string year;
-	string month;
-	string day;
-
+Date randomDate(int yearBegin, int yearEnd) {
+	Date date;
 	yearEnd -= yearBegin;
+	date.year = rand() % yearEnd + yearBegin;
+	date.month = rand() % 12 + 1;
+	date.day = rand() % 30 + 1;
+
+	return date;
+}
+void fillRandomDatesForFile(string fileName, int count, int yearBegin, int yearEnd, MODE mode) {
+	string text = "";
+
 	for (int i = 0; i < count; i++) {
-		srand(time(0) + i);
-		day = to_string(rand() % 30 + 1);
-		month = to_string(rand() % 12 + 1);
-		year = to_string(rand() % yearEnd + yearBegin);
+		srand(i);
+		Date tmpDate = createDate(0, 0, 0);
+		tmpDate = randomDate(yearBegin, yearEnd);
+		text += convertDateToStr(tmpDate, '/', mode);
+		text += "\n";
+	}
 
-		if (day.size() == 1) {
-			day = (NUL + day);
+	createFile(fileName, text);
+}
+
+Date setNewFormatDate(Date date, MODE mode) {
+	Date ret = date;
+	switch (mode) {
+	case DM:
+		ret.year = -1;
+		break;
+	case DY:
+		ret.month = -1;
+		break;
+	case MY:
+		ret.day = -1;
+		break;
+	default:
+		break;
+	}
+	return ret;
+}
+Date getDatefromFile(string name, int pos, MODE mode) {
+	string line;
+	int position = 0;
+
+	ifstream iFile(name);
+
+	while (getline(iFile, line)) {
+		if (position == pos) {
+			return convertStrToDate(line, '/', mode);
 		}
-		if (month.size() == 1) {
-			month = (NUL + month);
-		}
+		position++;
+	}
 
+	iFile.close();
+}
 
-		date += day += SEPARATE;
-		date += month += SEPARATE;
-		date += year += NEXTLINE;
-
-		writeFile(name, date);
-		date.clear();
+void getAllDatesfromFile(string name, Date* arr, int size, MODE mode) {
+	for (int i = 0; i < size; i++) {
+		arr[i] = getDatefromFile(name, i, mode);
 	}
 }
+void setAllNewFormatDates(string name, Date* dates, int size, MODE mode) {
+	string strDates = "";
+	for (int i = 0; i < size; i++) {
+		dates[i] = setNewFormatDate(dates[i], mode);
+		strDates = convertDateToStr(dates[i], '/', mode);
+		strDates += "\n";
+	}
+	createFile(name, strDates);
+}
+
 
 
 void Task4() {
+	Date dates[10];
+	const string FILE_NAME = "Name.txt";
 
-	createFile("Name.txt", "");
-	fillRandomDate("Name.txt", 10, 1945, 2001);
-	deleteDateElement("Name.txt",DAY);
+	fillRandomDatesForFile(FILE_NAME, 10, 1984, 2010, DMY);
+	getAllDatesfromFile(FILE_NAME, dates, 10, DMY);
+	setAllNewFormatDates(FILE_NAME, dates, 10, DM);
 
-	//void(*ptrFunc)(MODE,int,ofstream, ifstream);
-	//ptrFunc = &fileDateManipulation;
-	//createAndFillFiles(name, 3, extension, ptrFunc);
 }
 
 
 
-
-//
-//void createAndFillFiles(char* Name, int numberFiles, char* extension, void(*func)(MODE, int,ofstream,ifstream)) {
-//	ofstream outputFile;
-//	ifstream inputFile;
-//	char source[20];
-//	for (int i = 0; i <= numberFiles; i++) {
-//		char num[5];
-//		itoa(i, num, 10);
-//		strcpy(source, Name);
-//		strcat(source, num);
-//		strcat(source, extension);
-//		outputFile.open((char*)source, ios_base::out);
-//		func(static_cast<MODE>(i), numberFiles, outputFile, inputFile);
-//		outputFile.close();
-//		inputFile.close();
-//	}
-//}
-////FIX THIS
-//string randomDate(int yearBegin, int yearEnd,string separator) {
-//	string date;
-//	yearEnd -= yearBegin;
-//
-//	srand(time(0));
-//	string year;
-//	string month;
-//	string day;
-//	year = to_string(rand() % yearEnd + yearBegin);
-//	month = to_string(rand() % 12 + 1);
-//	day = to_string(rand() % 30 + 1);
-//	date.append(day);
-//	date.append(separator);
-//	date.append(month);
-//	date.append(separator);
-//	date.append(year);
-//	date.append("\n");
-//
-//	return date;
-//}
-//
-//void fileDateManipulation(MODE mode, int max, ofstream fileOut,ifstream fileInput) {
-//	string temp = "";
-//	switch (mode) {
-//	case RANDOM_DATE:
-//		for (int i = 0; i < max; i++) {
-//			temp += randomDate(1984, 2030,SEPARATOR);
-//		}
-//		fileOut << temp;
-//		temp.clear();
-//		break;
-//	case DAY_MONTH:
-//		break;
-//	case DAY_YEAR:
-//		break;
-//	case MONTH_YEAR:
-//		break;
-//	default:
-//		break;
-//	}
-//}
