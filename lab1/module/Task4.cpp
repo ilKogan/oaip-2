@@ -12,11 +12,17 @@ struct Date {
 	int year;
 };
 
-enum MODE {
+enum VIEWMODE {
 	DMY,
 	DM,
 	DY,
 	MY
+};
+
+enum GETMODE {
+	DAY,
+	MONTH,
+	YEAR
 };
 
 void createFile(string name, string content) {
@@ -33,28 +39,38 @@ Date createDate(int day, int month, int year) {
 	return newDate;
 }
 
-//TODO: FIX convertStrToInt 
-int convertStrToint(int beginPos, string str, int dimen = 10) {
-	int ret = 0;
-	int dim = dimen;
-	for (int i = beginPos; ; i++) {
-		if (str[i] >= '0' && str[i] <= '9') {
-			ret += ret * 10 + (str[i] - '0') * dim;
-		}
-		dim /= 10;
 
-		if (dim == 1) {
-			ret += ret * 10 + (str[i] - '0') * dim;
-			break;
-		}
+int convertStrToint(string str,GETMODE mode) {
+	string day = str.substr(0, 2);
+	string month = str.substr(3, 2);
+	string year = str.substr(6, 9);
+
+	switch (mode) {
+	case DAY: return stoi(day);
+		break;
+	case MONTH:return stoi(month);
+		break;
+	case YEAR:return stoi(year);
+		break;
+	default:
+		break;
 	}
-	return ret;
+
+	return 0;
 }
-string convertDateToStr(Date date, char separate, MODE mode) {
+string convertDateToStr(Date date, char separate, VIEWMODE mode) {
 	string day = to_string(date.day);
 	string month = to_string(date.month);
 	string year = to_string(date.year);
 	string strDate;
+
+	if (day.size() == 1) {
+		day = "0" + day;
+	}
+
+	if (month.size() == 1) {
+		month = "0" + month;
+	}
 
 	switch (mode) {
 	case DMY:
@@ -84,7 +100,7 @@ string convertDateToStr(Date date, char separate, MODE mode) {
 	}
 	return strDate;
 }
-Date convertStrToDate(string date, char separate, MODE mode) {
+Date convertStrToDate(string date, char separate, VIEWMODE mode) {
 
 	int day = 0;
 	int month = 0;
@@ -92,25 +108,25 @@ Date convertStrToDate(string date, char separate, MODE mode) {
 
 	switch (mode) {
 	case DMY:
-		day = convertStrToint(0, date, 10);
-		month = convertStrToint(3, date, 10);
-		year = convertStrToint(6, date, 1000);
+		day = convertStrToint(date,DAY);
+		month = convertStrToint(date, MONTH);
+		year = convertStrToint(date,YEAR);
 		break;
 	case DM:
-		day = convertStrToint(0, date, 10);
-		month = convertStrToint(3, date, 10);
+		day = convertStrToint(date, DAY);
+		month = convertStrToint(date, MONTH);
 		year = -1;
 		break;
 	case DY:
-		day = convertStrToint(0, date, 10);
+		day = convertStrToint(date, DAY);
 		month = -1;
-		year = convertStrToint(3, date, 1000);
+		year = convertStrToint(date, YEAR);
 
 		break;
 	case MY:
 		day = -1;
-		month = convertStrToint(0, date, 10);
-		year = convertStrToint(3, date, 1000);
+		month = convertStrToint(date, MONTH);
+		year = convertStrToint(date, YEAR);
 		break;
 	default:
 		break;
@@ -128,7 +144,7 @@ Date randomDate(int yearBegin, int yearEnd) {
 
 	return date;
 }
-void fillRandomDatesForFile(string fileName, int count, int yearBegin, int yearEnd, MODE mode) {
+void fillRandomDatesForFile(string fileName, int count, int yearBegin, int yearEnd, VIEWMODE mode) {
 	string text = "";
 
 	for (int i = 0; i < count; i++) {
@@ -142,7 +158,7 @@ void fillRandomDatesForFile(string fileName, int count, int yearBegin, int yearE
 	createFile(fileName, text);
 }
 
-Date setNewFormatDate(Date date, MODE mode) {
+Date setNewFormatDate(Date date, VIEWMODE mode) {
 	Date ret = date;
 	switch (mode) {
 	case DM:
@@ -159,7 +175,7 @@ Date setNewFormatDate(Date date, MODE mode) {
 	}
 	return ret;
 }
-Date getDatefromFile(string name, int pos, MODE mode) {
+Date getDatefromFile(string name, int pos, VIEWMODE mode) {
 	string line;
 	int position = 0;
 
@@ -175,16 +191,16 @@ Date getDatefromFile(string name, int pos, MODE mode) {
 	iFile.close();
 }
 
-void getAllDatesfromFile(string name, Date* arr, int size, MODE mode) {
+void getAllDatesfromFile(string name, Date* arr, int size, VIEWMODE mode) {
 	for (int i = 0; i < size; i++) {
 		arr[i] = getDatefromFile(name, i, mode);
 	}
 }
-void setAllNewFormatDates(string name, Date* dates, int size, MODE mode) {
+void setAllNewFormatDates(string name, Date* dates, int size, VIEWMODE mode) {
 	string strDates = "";
 	for (int i = 0; i < size; i++) {
 		dates[i] = setNewFormatDate(dates[i], mode);
-		strDates = convertDateToStr(dates[i], '/', mode);
+		strDates += convertDateToStr(dates[i], '/', mode);
 		strDates += "\n";
 	}
 	createFile(name, strDates);
@@ -193,13 +209,12 @@ void setAllNewFormatDates(string name, Date* dates, int size, MODE mode) {
 
 
 void Task4() {
-	Date dates[10];
-	const string FILE_NAME = "Name.txt";
+	Date dates[5];
 
-	fillRandomDatesForFile(FILE_NAME, 10, 1984, 2010, DMY);
-	getAllDatesfromFile(FILE_NAME, dates, 10, DMY);
-	setAllNewFormatDates(FILE_NAME, dates, 10, DM);
 
+	fillRandomDatesForFile("Task4_Day-Month-Year.txt", 5, 1984, 2010, DMY);
+	getAllDatesfromFile("Task4_Day-Month-Year.txt", dates, 5, DMY);
+	setAllNewFormatDates("Task4_Day-Month.txt", dates, 5, DM);
 }
 
 
