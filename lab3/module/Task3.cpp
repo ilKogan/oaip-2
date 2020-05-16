@@ -7,156 +7,156 @@ using namespace std;
 
 template <typename T>
 struct Stack {
-	int top;
-	T element[MAX_SIZE];
+  int top;
+  T element[MAX_SIZE];
 
-	void init() {
-		top = 0;
-	}
-	int size() {
-		return top;
-	}
-	void clear() {
-		for (int i = top; i >= 0; i--) {
-			element[i] = NULL;
-		}
-		top = 0;
-	}
-	void push(T e) {
-		if (top < MAX_SIZE) {
-			element[top] = e;
-			top++;
-		}
-	}
-	T pop() {
-		T e;
-		if (top > 0) {
-			top--;
-			e = element[top];
-			element[top] = NULL;
-			return e;
-		}
-	}
-	T back() {
-		return element[top - 1];
-	}
-	bool empty() {
-		if (top == 0) {
-			return true;
-		}
-	}
+  void init() {
+    top = 0;
+  }
+  int size() {
+    return top;
+  }
+  void clear() {
+    for (int i = top; i >= 0; i--) {
+      element[i] = NULL;
+    }
+    top = 0;
+  }
+  void push(T e) {
+    if (top < MAX_SIZE) {
+      element[top] = e;
+      top++;
+    }
+  }
+  T pop() {
+    T e;
+    if (top > 0) {
+      top--;
+      e = element[top];
+      element[top] = NULL;
+      return e;
+    }
+  }
+  T back() {
+    return element[top - 1];
+  }
+  bool empty() {
+    if (top == 0) {
+      return true;
+    }
+  }
 };
 struct Queue {
-	int element[MAX_SIZE];
-	int first, last;
+  int element[MAX_SIZE];
+  int first, last;
 
-	void init() {
-		first = 1;
-		last = 0;
-	}
+  void init() {
+    first = 1;
+    last = 0;
+  }
 
-	void push(int e) {
-		if (last < MAX_SIZE - 1) {
-			last++;
-			element[last] = e;
-		} else {
-			cout << "Queue Full";
-		}
-	}
+  void push(int e) {
+    if (last < MAX_SIZE - 1) {
+      last++;
+      element[last] = e;
+    } else {
+      cout << "Queue Full";
+    }
+  }
 
-	int front() {
-		int e;
-		e = element[first];
-		return e;
-	}
+  int front() {
+    int e;
+    e = element[first];
+    return e;
+  }
 
-	int back() {
-		int e;
-		e = element[last];
-		return e;
-	}
+  int back() {
+    int e;
+    e = element[last];
+    return e;
+  }
 
-	int pop() {
-		int e;
-		e = element[first];
-		first++;
-		return e;
-	}
+  int pop() {
+    int e;
+    e = element[first];
+    first++;
+    return e;
+  }
 
-	int size() {
-		return (last + 1) - first;
-	}
+  int size() {
+    return (last + 1) - first;
+  }
 
-	void clear() {
-		for (int i = first; i >= 1; i--) {
-			element[i] = 0;
-		}
-		first = 1;
-		last = 0;
-	}
+  void clear() {
+    for (int i = first; i >= 1; i--) {
+      element[i] = 0;
+    }
+    first = 1;
+    last = 0;
+  }
 
 };
 
 
 int chtoi(char c) {
-	int ret = 0;
-	if (c >= '0' && c <= '9') {
-		return ret * 10 + c - '0';
-	}
+  int ret = 0;
+  if (c >= '0' && c <= '9') {
+    return ret * 10 + c - '0';
+  }
 }
 bool checkNum(char c) {
-	if (c >= '0' && c <= '9') {
-		return true;
-	}
-	return false;
+  if (c >= '0' && c <= '9') {
+    return true;
+  }
+  return false;
 }
 int calculate(int a, char ch, int b) {
-	switch (ch) {
-	case '-':	return a - b;
-		break;
-	case '+': return a + b;
-		break;
-	case '*': return a * b;
-		break;
-	case '/': return a / b;
-		break;
-	default:
-		break;
-	}
+  switch (ch) {
+  case '-':	return a - b;
+    break;
+  case '+': return a + b;
+    break;
+  case '*': return a * b;
+    break;
+  case '/': return a / b;
+    break;
+  default:
+    break;
+  }
 }
 
 
 
 Stack<char> stringToStackChar(string input) {
-	Stack<char> tmp;
-	tmp.init();
-	for (int i = input.size() - 1; i > -1; i--) {
-				tmp.push(input[i]);
-	}
-	return tmp;
+  Stack<char> tmp;
+  tmp.init();
+  for (int i = input.size() - 1; i > -1; i--) {
+    tmp.push(input[i]);
+  }
+  return tmp;
 }
 int calculateInversePolishNotation(string input) {
-	Stack<char> read = stringToStackChar(input);
-	Stack<int> calc;
-	calc.init();
+  Stack<char> read = stringToStackChar(input);
+  Stack<int> calc;
+  calc.init();
 
-	while (read.empty() != true) {
-		if (checkNum(read.back())) {
-			calc.push(chtoi(read.pop()));
-		} else {
-			calc.push(calculate(calc.pop(), read.pop(), calc.pop()));
-		}
-	}
-	return calc.pop();
+  while (read.empty() != true) {
+    if (checkNum(read.back())) {
+      calc.push(chtoi(read.pop()));
+    } else {
+      calc.push(calculate(calc.pop(), read.pop(), calc.pop()));
+    }
+  }
+  return calc.pop();
 }
 
 
 
 void Task3() {
-	string in = "";
-	int out = 0;
+  string in = "";
+  int out = 0;
 
-	cin >> in;
+  cin >> in;
 
-	out = calculateInversePolishNotation(in);
+  out = calculateInversePolishNotation(in);
 }
