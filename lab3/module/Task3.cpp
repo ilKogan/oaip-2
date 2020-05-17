@@ -10,7 +10,7 @@ struct Stack {
   int top;
   T element[MAX_SIZE];
 
-  void init() {
+  Stack() {
     top = 0;
   }
   int size() {
@@ -41,16 +41,14 @@ struct Stack {
     return element[top - 1];
   }
   bool empty() {
-    if (top == 0) {
-      return true;
-    }
+    return top == 0;
   }
 };
 struct Queue {
   int element[MAX_SIZE];
   int first, last;
 
-  void init() {
+  Queue() {
     first = 1;
     last = 0;
   }
@@ -59,21 +57,15 @@ struct Queue {
     if (last < MAX_SIZE - 1) {
       last++;
       element[last] = e;
-    } else {
-      cout << "Queue Full";
     }
   }
 
   int front() {
-    int e;
-    e = element[first];
-    return e;
+    return element[first];
   }
 
   int back() {
-    int e;
-    e = element[last];
-    return e;
+    return element[last];
   }
 
   int pop() {
@@ -129,7 +121,6 @@ int calculate(int a, char ch, int b) {
 
 Stack<char> stringToStackChar(string input) {
   Stack<char> tmp;
-  tmp.init();
   for (int i = input.size() - 1; i > -1; i--) {
     tmp.push(input[i]);
   }
@@ -138,7 +129,6 @@ Stack<char> stringToStackChar(string input) {
 int calculateInversePolishNotation(string input) {
   Stack<char> read = stringToStackChar(input);
   Stack<int> calc;
-  calc.init();
 
   while (read.empty() != true) {
     if (checkNum(read.back())) {
