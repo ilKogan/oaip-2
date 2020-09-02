@@ -1,0 +1,12 @@
+In the C programming;
+ language, the function also has an address and can have a p
+ointer. A pointer to a function is an expression or variable
+ that is used to represent the address of the function. The 
+function pointer contains the address of the first byte in t
+he memory at which the function code to be executed is locat
+ed.;
+  The most common pointer to a function is its name. With th
+e function name, we can call it and get the result of ;
+its work.  But also a pointer;
+ to a function we can define as a separate variable;
+ using the following syntax: 
